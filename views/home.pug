@@ -3,7 +3,7 @@ if user
         head
             title Blog
         body
-            form(method="POST")
+              form(method="post")
               
                 label(for="pseudo") Pseudo
                 br
@@ -28,15 +28,21 @@ if user
                 button(type="submit") Envoyer
                 br
                 br
-                for article in articles
-                    article  
-                          h1 #{article.pseudo}
-                          p #{article.title}
-                          p #{article.note}
-                          p #{article.content}
-                          a(href="/commentaire/"+article.id) Donner un commentaire
-                          each comment in article.reponses
-                            p #{comment.reponse} - #{comment.pseudo}
+                  
+              for article in articles
+                  article  
+                        h1 #{article.pseudo}
+                        p #{article.title}
+                        p #{article.note}
+                        p #{article.content}
+                        h1 (#{article.score}) 
+                        form(method="post", action="/" + article.id + "/upvote")
+                          button(type="submit") upvote
+                        form(method="post", action="/" + article.id + "/downvote")
+                          button(type="submit") downvote
+                          
+                        a(href="/commentaire/"+article.id) Donner un commentaire
+                            
                             
 else
         p Please log in or create account.

@@ -6,6 +6,81 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const Sequelize = require('sequelize');
 
+const db = new Sequelize('blog', 'root', '', {
+    host: 'localhost',
+    dialect: 'mysql'
+});
+
+
+/*const Post = db.define('post', {
+    title: {
+        type: Sequelize.STRING
+    },
+    content: {
+        type: Sequelize.TEXT
+    }
+}, {
+    getterMethods: {
+        score() {
+            return this.getDataValue('votes').reduce((total, vote) => {
+                if (vote.type === 'up') {
+                    return total + 1;
+                }
+
+                if (vote.type === 'down') {
+                    return total - 1;
+                }
+
+                return total;
+            }, 0);
+        }
+    }
+});*/
+
+const Vote = db.define('vote', {
+    type: { type: Sequelize.ENUM('up', 'down') }
+});
+
+const Article = db.define('article', {
+    pseudo: { type: Sequelize.TEXT },
+    title: { type: Sequelize.STRING },
+    note: { type: Sequelize.TINYINT },
+    content: { type: Sequelize.TEXT }
+  }, {
+        getterMethods: {
+            score() {
+                return this.getDataValue('votes').reduce((total, vote) => {
+                    if (vote.type === 'up') {
+                        return total + 1;
+                    }
+
+                    if (vote.type === 'down') {
+                        return total - 1;
+                    }
+
+                    return total;
+                }, 0);
+            }
+        }
+
+});
+
+Article.hasMany(Vote);
+Vote.belongsTo(Article);
+
+const Log = db.define('log', {
+    email: { type: Sequelize.TEXT },
+    password: { type: Sequelize.TEXT }
+});
+
+const Reponse = db.define('reponse', {
+    reponse: { type: Sequelize.TEXT },
+    pseudo: { type: Sequelize.TEXT }
+});
+
+Reponse.belongsTo(Article)
+Article.hasMany(Reponse)
+
 // This secret will be used to sign and encrypt cookies
 const COOKIE_SECRET = 'cookie secret';
 
@@ -78,7 +153,11 @@ app.get('/create', (req, res) => {
     res.render('create');
 });
 
-
+app.get('/', (req, res) => {
+    Article
+        .findAll({ include: [Vote] })
+        .then(posts => res.render('home', { articles: posts, user: req.user }));
+});
 
 app.post('/login',
     // Authenticate user when the login form is submitted
@@ -99,30 +178,6 @@ app.post('/create', (req, res) => {
   })
 });
 
-const db = new Sequelize('blog', 'root', '', {
-    host: 'localhost',
-    dialect: 'mysql'
-});
-
-const Article = db.define('article', {
-    pseudo: { type: Sequelize.TEXT },
-    title: { type: Sequelize.STRING },
-    note: { type: Sequelize.TINYINT },
-    content: { type: Sequelize.TEXT },
-
-});
-
-const Log = db.define('log', {
-    email: { type: Sequelize.TEXT },
-    password: { type: Sequelize.TEXT }
-});
-const Reponse = db.define('reponse', {
-    reponse: { type: Sequelize.TEXT },
-    pseudo: { type: Sequelize.TEXT }
-});
-Reponse.belongsTo(Article)
-Article.hasMany(Reponse)
-
 app.get('/', (req, res) => {
     Article
         .findAll({ include: [ Reponse ] })
@@ -132,6 +187,7 @@ app.get('/', (req, res) => {
             res.render('home', { articles, user:req.user });
         });
 });
+
 app.get('/commentaire/:id', (req, res) => {
     Article
         .findById(req.params.id)
@@ -139,13 +195,13 @@ app.get('/commentaire/:id', (req, res) => {
             res.render('commentaire', { article:article, user:req.user });
         });
 });
-/*app.get('/', (req, res) => {
+app.get('/', (req, res) => {
     Log
         .findAll()
         .then((logs) => {
             res.render('home', { logs, user:req.user });
         });
-});*/
+});
 app.get('/home', (req, res) => {
     Reponse
         .findAll()
@@ -155,12 +211,14 @@ app.get('/home', (req, res) => {
 });
 
 app.post('/', (req, res) => {
+  console.log('RACINE');
     const { pseudo, title, note, content, } = req.body;
     Article
         .sync()
         .then(() => Article.create({ pseudo, title, note, content }))
         .then(() => res.redirect('/'));
 });
+
 
 app.post('/commentaire/:id', (req, res) => {
     const { reponse } = req.body;
@@ -174,6 +232,19 @@ app.post('/', (req, res) => {
     Log
         .sync()
         .then(() => log.create({ email, password }))
+        .then(() => res.redirect('/'));
+});
+
+app.post('/:postID/upvote', (req, res) => {
+  console.log('UP');
+    Vote
+        .create({ type: 'up', articleId: req.params.postID })
+        .then(() => res.redirect('/'));
+});
+
+app.post('/:postID/downvote', (req, res) => {
+    Vote
+        .create({ type: 'down', articleId: req.params.postID })
         .then(() => res.redirect('/'));
 });
 
