@@ -1,24 +1,46 @@
 if user
-    h1 Welcome #{user.firstname} #{user.lastname}!
-    
     html
         head
             title Blog
         body
-            for article in articles
-                article
-                    h1 #{article.title}
-                    p #{article.content}
             form(method="POST")
-                p
-                    strong Create a new article
-                label(for="title") Title
-                input(type="text", id="title", name="title", placeholder="Some Great Article Title")
-                label(for="content") Content
-                textarea(id="content", name="content", placeholder="Some great article content...")
-                button(type="submit") Post
+              
+                label(for="pseudo") Pseudo
+                br
+                input(type="text", id="pseudo", name="pseudo", placeholder="", value=user.email)
+                br
+                br
+                label(for="title") Nom du Jeux
+                br
+                input(type="text", id="title", name="title", placeholder="")
+                br
+                br
+                label(for="note") Note du Jeux
+                br
+                input(type="text", id="note", name="note", placeholder="?/20")
+                br
+                br
+                label(for="content") Contenue du Jeux
+                br
+                textarea(id="content", name="content", placeholder="")
+                br
+                br
+                button(type="submit") Envoyer
+                br
+                br
+                for article in articles
+                    article  
+                          h1 #{article.pseudo}
+                          p #{article.title}
+                          p #{article.note}
+                          p #{article.content}
+                          a(href="/commentaire/"+article.id) Donner un commentaire
+                            
 else
-    p Please log in or create account.
-a(href="/login") Log in
-br
-a(href="/create") Create account
+        p Please log in or create account.
+          br
+          a(href="/login") Log in
+          br
+          a(href="/create") Create account
+
+              

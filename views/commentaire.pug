@@ -1,0 +1,12 @@
+form(method="POST")
+  article  
+        h1 #{article.pseudo}
+        p #{article.title}
+        p #{article.note}
+        p #{article.content}
+        label(for="reponse") Réponse:
+        br
+        textarea(id="reponse", name="reponse", placeholder="")
+        br
+        br
+        button(type="submit") Envoyer

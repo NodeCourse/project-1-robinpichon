@@ -78,6 +78,8 @@ app.get('/create', (req, res) => {
     res.render('create');
 });
 
+
+
 app.post('/login',
     // Authenticate user when the login form is submitted
     passport.authenticate('local', {
@@ -103,19 +105,38 @@ const db = new Sequelize('blog', 'root', '', {
 });
 
 const Article = db.define('article', {
+    pseudo: { type: Sequelize.TEXT },
     title: { type: Sequelize.STRING },
-    content: { type: Sequelize.TEXT }
+    note: { type: Sequelize.TINYINT },
+    content: { type: Sequelize.TEXT },
+
 });
 
 const Log = db.define('log', {
     email: { type: Sequelize.TEXT },
     password: { type: Sequelize.TEXT }
 });
+const Reponse = db.define('reponse', {
+    reponse: { type: Sequelize.TEXT },
+    pseudo: { type: Sequelize.TEXT }
+});
+Reponse.belongsTo(Article)
+Article.hasMany(Reponse)
+
 app.get('/', (req, res) => {
     Article
         .findAll()
         .then((articles) => {
+            console.log("bstbqvgrq")
+          console.log(articles)
             res.render('home', { articles, user:req.user });
+        });
+});
+app.get('/commentaire/:id', (req, res) => {
+    Article
+        .findById(req.params.id)
+        .then((article) => {
+            res.render('commentaire', { article:article, user:req.user });
         });
 });
 app.get('/', (req, res) => {
@@ -125,22 +146,37 @@ app.get('/', (req, res) => {
             res.render('home', { logs, user:req.user });
         });
 });
-
-app.post('/', (req, res) => {
-    const { title, content } = req.body;
-    Article
-        .sync()
-        .then(() => Article.create({ title, content }))
-        .then(() => res.redirect('/'));
+app.get('/home', (req, res) => {
+    Reponse
+        .findAll()
+        .then((reponses) => {
+            res.render('home', { logs, user:req.user });
+        });
 });
 
 app.post('/', (req, res) => {
-    const { email, password } = req.body;
+    const { pseudo, title, note, content, } = req.body;
     Article
+        .sync()
+        .then(() => Article.create({ pseudo, title, note, content }))
+        .then(() => res.redirect('/'));
+});
+
+app.post('/commentaire/:id', (req, res) => {
+    const { reponse } = req.body;
+    Reponse
+        .sync()
+        .then(() => Reponse.create({ reponse, pseudo:req.user.email, articleId:req.params.id }))
+        .then(() => res.redirect('/'));
+});
+app.post('/', (req, res) => {
+    const { email, password } = req.body;
+    Log
         .sync()
         .then(() => log.create({ email, password }))
         .then(() => res.redirect('/'));
 });
+
 db.sync()
 app.listen(3000, () => {
     console.log('Listening on port 3000');
