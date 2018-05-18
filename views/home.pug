@@ -41,7 +41,10 @@ if user
                         form(method="post", action="/" + article.id + "/downvote")
                           button(type="submit") downvote
                           
-                        a(href="/commentaire/"+article.id) Donner un commentaire
+                        a(href="/commentaire/" + article.id) Donner un commentaire
+                        each comment in article.reponses
+                          p #{comment.reponse} - #{comment.pseudo}
+
                             
                             
 else

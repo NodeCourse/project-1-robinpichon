@@ -153,11 +153,11 @@ app.get('/create', (req, res) => {
     res.render('create');
 });
 
-app.get('/', (req, res) => {
+/*app.get('/', (req, res) => {
     Article
         .findAll({ include: [Vote] })
         .then(posts => res.render('home', { articles: posts, user: req.user }));
-});
+});*/
 
 app.post('/login',
     // Authenticate user when the login form is submitted
@@ -180,11 +180,9 @@ app.post('/create', (req, res) => {
 
 app.get('/', (req, res) => {
     Article
-        .findAll({ include: [ Reponse ] })
+        .findAll({ include: [ Vote, Reponse ] })
         .then((articles) => {
-            console.log("bstbqvgrq")
-          console.log(articles)
-            res.render('home', { articles, user:req.user });
+            res.render('home', { articles, user: req.user });
         });
 });
 
@@ -195,20 +193,22 @@ app.get('/commentaire/:id', (req, res) => {
             res.render('commentaire', { article:article, user:req.user });
         });
 });
-app.get('/', (req, res) => {
+
+/*app.get('/', (req, res) => {
     Log
-        .findAll()
+        .findAll({ include: [ Reponse ] })
         .then((logs) => {
             res.render('home', { logs, user:req.user });
         });
-});
-app.get('/home', (req, res) => {
+});*/
+
+/*app.get('/home', (req, res) => {
     Reponse
         .findAll()
         .then((reponses) => {
             res.render('home', { logs, user:req.user });
         });
-});
+});*/
 
 app.post('/', (req, res) => {
   console.log('RACINE');
@@ -219,7 +219,6 @@ app.post('/', (req, res) => {
         .then(() => res.redirect('/'));
 });
 
-
 app.post('/commentaire/:id', (req, res) => {
     const { reponse } = req.body;
     Reponse
@@ -227,13 +226,14 @@ app.post('/commentaire/:id', (req, res) => {
         .then(() => Reponse.create({ reponse, pseudo:req.user.email, articleId:req.params.id }))
         .then(() => res.redirect('/'));
 });
-app.post('/', (req, res) => {
+
+/*app.post('/', (req, res) => {
     const { email, password } = req.body;
     Log
         .sync()
         .then(() => log.create({ email, password }))
         .then(() => res.redirect('/'));
-});
+});*/
 
 app.post('/:postID/upvote', (req, res) => {
   console.log('UP');
