@@ -125,7 +125,7 @@ Article.hasMany(Reponse)
 
 app.get('/', (req, res) => {
     Article
-        .findAll()
+        .findAll({ include: [ Reponse ] })
         .then((articles) => {
             console.log("bstbqvgrq")
           console.log(articles)
@@ -139,13 +139,13 @@ app.get('/commentaire/:id', (req, res) => {
             res.render('commentaire', { article:article, user:req.user });
         });
 });
-app.get('/', (req, res) => {
+/*app.get('/', (req, res) => {
     Log
         .findAll()
         .then((logs) => {
             res.render('home', { logs, user:req.user });
         });
-});
+});*/
 app.get('/home', (req, res) => {
     Reponse
         .findAll()

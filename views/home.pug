@@ -35,6 +35,8 @@ if user
                           p #{article.note}
                           p #{article.content}
                           a(href="/commentaire/"+article.id) Donner un commentaire
+                          each comment in article.reponses
+                            p #{comment.reponse} - #{comment.pseudo}
                             
 else
         p Please log in or create account.
